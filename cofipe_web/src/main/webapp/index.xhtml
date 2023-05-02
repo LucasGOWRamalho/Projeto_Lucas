@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>COFIPE</title>
+</h:head>
+
+<h:body>
+	<h:form id="frmLcto">
+		<p:growl id="msgs" showDetail="true" life="5000" />
+
+		<p:panel id="filterPanel" header="Pesquisar" styleClass="mb-3">
+            <h:panelGrid columns="5" cellpadding="7">
+                <h:outputLabel for="@next" value="Data inicial"/>
+                <p:datePicker id="dtInicial" value="#{lctoBean.filter.dataInicial}" required="true" style="width: 12rem" />
+                
+                <h:outputLabel for="@next" value="Data final"/>
+                <p:datePicker id="dtFinal" value="#{lctoBean.filter.dataFinal}" required="true" style="width: 12rem" />
+            
+            	<p:commandButton process=":frmLcto:filterPanel" update=":frmLcto:lctos :frmLcto:msgs"
+        			value="Pesquisar" styleClass="mr-2" action="#{lctoBean.pesquisaPorDatas}" />
+            </h:panelGrid>
+        </p:panel>
+
+		<p:dataTable lazy="false" id="lctos" var="lcto"
+			stripedRows="true" rows="10" paginator="true"
+			value="#{lctoBean.lancamentos}" rowKey="#{lcto.id}" editable="true"
+			selection="#{lctoBean.lctoSelecionado}" selectionMode="single"
+			paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+            rowsPerPageTemplate="5,10,{ShowAll|'All'}">
+			<f:facet name="header">Lista de lançamentos</f:facet>
+
+			<p:ajax event="rowEdit" listener="#{lctoBean.onRowEdit}"
+				update=":frmLcto:msgs" />
+			<p:ajax event="rowEditCancel" listener="#{lctoBean.onRowCancel}"
+				update=":frmLcto:msgs" />
+
+			<p:column headerText="Descrição">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.descricao}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:inputText id="inptDesc" value="#{lcto.descricao}" />
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Data lançamento" sortBy="#{lcto.dataLancamento}">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.dataLancamento}">
+							<f:convertDateTime pattern="dd/MM/yyyy" type="localDate" />
+						</h:outputText>
+					</f:facet>
+					<f:facet name="input">
+						<p:datePicker id="dataLancamento" value="#{lcto.dataLancamento}" pattern="dd/MM/yyyy">
+		                    <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+		                </p:datePicker>
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Data liquidação">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.dataLiquidacao}">
+							<f:convertDateTime pattern="dd/MM/yyyy" type="localDate" />
+						</h:outputText>
+					</f:facet>
+					<f:facet name="input">
+						<p:datePicker id="dataLiquidacao" value="#{lcto.dataLiquidacao}" pattern="dd/MM/yyyy">
+		                    <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+		                </p:datePicker>
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Forma pagamento">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.formaPagamento.value}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:selectOneMenu id="inptFormaPgto" value="#{lcto.formaPagamento}">
+							<f:selectItems itemLabel="#{fp.value}" var="fp" value="#{lctoBean.formasPagamento}" />						
+						</p:selectOneMenu>
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Liquidado?">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.liquidado ? 'Sim' : 'Não'}" />					
+					</f:facet>
+					<f:facet name="input">
+						<p:selectBooleanCheckbox id="cbLiquidado" value="#{lcto.liquidado}" />
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Tipo lançamento">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.tipoLancamento.value}" />
+					</f:facet>
+					<f:facet name="input">
+						<p:selectOneMenu id="inptTipoPgto" value="#{lcto.tipoLancamento}">
+							<f:selectItems itemLabel="#{tl.value}" var="tl" value="#{lctoBean.tiposLancamento}" />						
+						</p:selectOneMenu>
+					</f:facet>
+				</p:cellEditor>
+			</p:column>
+
+			<p:column headerText="Valor" sortBy="#{lcto.valor}">
+				<p:cellEditor>
+					<f:facet name="output">
+						<h:outputText value="#{lcto.valor}">
+							<f:convertNumber type="currency"
+								pattern="R$ #,##0.00" />
+						</h:outputText>
+					</f:facet>
+					<f:facet name="input">
+						<p:inputNumber id="inptValor"
+							value="#{lcto.valor}" />
+					</f:facet>
+				</p:cellEditor>
+
+			</p:column>
+
+			<p:column style="width:6rem">
+				<p:rowEditor editTitle="Editar" cancelTitle="Cancelar"
+					saveTitle="Atualizar" />
+			</p:column>
+		</p:dataTable>
+	</h:form>
+</h:body>
+</html>
